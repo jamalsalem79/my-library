@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my library</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+          <!-- الرأس -->
+        <header class="header">
+            <h1><i class="fas fa-book"></i>المكتبة الشخصية</h1>
+            <p class="subtitle">نظام إدارة الكتب الشخصي</p>
+        </header>
+
+         <!-- إحصائيات -->
+        <div class="stats">
+            <div class="stat-card">
+                <i class="fas fa-book-open"></i>
+                <h3>إجمالي الكتب</h3>
+                <p id="totalBooks">0</p>
+            </div>
+             <div class="stat-card">
+                <i class="fas fa-calendar"></i>
+                <h3>أقدم كتاب</h3>
+                <p id="oldestBook">-</p>
+            </div>
+        </div>
+    </div>
+
+       <!-- نموذج الإضافة -->
+   <form id="bookForm">
+                <div class="form-group">
+                    <input type="text" id="title" placeholder="عنوان الكتاب *" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="author" placeholder="اسم المؤلف *" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="year" placeholder="سنة النشر (مثال: 2023)" min="1000" max="2099">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="publisher" placeholder="دار النشر">
+                </div>
+                <div class="form-group">
+                    <select id="category">
+                        <option value="">اختر التصنيف</option>
+                        <option value="أدب">أدب</option>
+                        <option value="علمي">علمي</option>
+                        <option value="تاريخ">تاريخ</option>
+                        <option value="ديني">ديني</option>
+                        <option value="فلسفة">فلسفة</option>
+                        <option value="أخرى">أخرى</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <textarea id="notes" placeholder="ملاحظات إضافية..." rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> حفظ الكتاب
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                    <i class="fas fa-eraser"></i> مسح النموذج
+                </button>
+            </form>
+        </div>
+
+    <!-- البحث والتصفية -->
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="🔍 ابحث عن كتاب أو مؤلف...">
+            <div class="filters">
+                <select id="filterCategory" onchange="filterBooks()">
+                    <option value="">جميع التصنيفات</option>
+                </select>
+                <select id="filterYear" onchange="filterBooks()">
+                    <option value="">جميع السنوات</option>
+                </select>
+                <button class="btn" onclick="exportData()">
+                    <i class="fas fa-download"></i> تصدير البيانات
+                </button>
+                <button class="btn btn-danger" onclick="backupData()">
+                    <i class="fas fa-database"></i> نسخ احتياطي
+                </button>
+            </div>
+        </div>
+
+<!-- في قسم النسخ الاحتياطي، أضف هذه الأزرار -->
+
+<div class="export-advanced">
+    <h3><i class="fas fa-file-export"></i> تصدير متقدم</h3>
+    
+    <!-- خيارات التصدير -->
+    <div class="export-options">
+        <div class="option-row">
+            <label><i class="fas fa-palette"></i> تنسيق الملف:</label>
+            <select id="exportTheme" class="export-select">
+                <option value="professional">احترافي</option>
+                <option value="classic">كلاسيكي</option>
+                <option value="modern">حديث</option>
+            </select>
+        </div>
+        
+        <div class="option-row">
+            <label><i class="fas fa-columns"></i> الأعمدة:</label>
+            <div class="columns-select">
+                <label><input type="checkbox" name="exportCols" value="title" checked> العنوان</label>
+                <label><input type="checkbox" name="exportCols" value="author" checked> المؤلف</label>
+                <label><input type="checkbox" name="exportCols" value="year" checked> السنة</label>
+                <label><input type="checkbox" name="exportCols" value="category" checked> التصنيف</label>
+                <label><input type="checkbox" name="exportCols" value="publisher"> الناشر</label>
+                <label><input type="checkbox" name="exportCols" value="notes"> الملاحظات</label>
+                <label><input type="checkbox" name="exportCols" value="created" checked> التاريخ</label>
+            </div>
+        </div>
+        
+        <div class="option-row">
+            <label><i class="fas fa-sort"></i> الترتيب:</label>
+            <select id="exportSort" class="export-select">
+                <option value="date">تاريخ الإضافة</option>
+                <option value="title">حسب العنوان</option>
+                <option value="author">حسب المؤلف</option>
+                <option value="year">حسب السنة</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- أزرار التصدير -->
+    <div class="export-buttons">
+        <button class="btn-export excel-btn" onclick="ProfessionalExporter.exportExcel()">
+            <div class="btn-icon">
+                <i class="fas fa-file-excel"></i>
+            </div>
+            <div class="btn-text">
+                <strong>Excel</strong>
+                <small>ملف منظم متعدد الأوراق</small>
+            </div>
+        </button>
+        
+        <button class="btn-export pdf-btn" onclick="ProfessionalExporter.exportPDF()">
+            <div class="btn-icon">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="btn-text">
+                <strong>PDF</strong>
+                <small>تقرير ملون وجاهز للطباعة</small>
+            </div>
+        </button>
+        
+        <button class="btn-export csv-btn" onclick="ProfessionalExporter.exportCSV()">
+            <div class="btn-icon">
+                <i class="fas fa-file-csv"></i>
+            </div>
+            <div class="btn-text">
+                <strong>CSV</strong>
+                <small>بيانات نصية منظمة</small>
+            </div>
+        </button>
+        
+        <button class="btn-export html-btn" onclick="ProfessionalExporter.exportHTML()">
+            <div class="btn-icon">
+                <i class="fas fa-file-code"></i>
+            </div>
+            <div class="btn-text">
+                <strong>صفحة ويب</strong>
+                <small>عرض تفاعلي وجميل</small>
+            </div>
+        </button>
+        
+        <button class="btn-export print-btn" onclick="ProfessionalExporter.showPrintView()">
+            <div class="btn-icon">
+                <i class="fas fa-print"></i>
+            </div>
+            <div class="btn-text">
+                <strong>طباعة</strong>
+                <small>معاينة قبل الطباعة</small>
+            </div>
+        </button>
+        
+        <button class="btn-export json-btn" onclick="ProfessionalExporter.exportJSON()">
+            <div class="btn-icon">
+                <i class="fas fa-file-code"></i>
+            </div>
+            <div class="btn-text">
+                <strong>JSON</strong>
+                <small>بيانات منظمة للبرمجة</small>
+            </div>
+        </button>
+    </div>
+    
+    <!-- شريط التقدم -->
+    <div class="export-progress" id="exportProgress" style="display: none;">
+        <div class="progress-header">
+            <span id="progressTitle">جاري التصدير...</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-details" id="progressDetails"></div>
+    </div>
+</div>
+
+<!-- نافذة المعاينة -->
+<div id="previewModal" class="modal">
+    <div class="modal-content preview-modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-eye"></i> معاينة التصدير</h3>
+            <span class="close" onclick="ProfessionalExporter.closePreview()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="previewContent"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="ProfessionalExporter.downloadPreview()">
+                <i class="fas fa-download"></i> تنزيل
+            </button>
+            <button class="btn" onclick="ProfessionalExporter.closePreview()">
+                <i class="fas fa-times"></i> إغلاق
+            </button>
+        </div>
+    </div>
+</div>
+     
+<!-- جدول الكتب -->
+        <div class="table-section">
+            <h2><i class="fas fa-books"></i> قائمة الكتب (<span id="bookCount">0</span>)</h2>
+            <div class="table-container">
+                <table id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>العنوان</th>
+                            <th>المؤلف</th>
+                            <th>سنة النشر</th>
+                            <th>التصنيف</th>
+                            <th>دار النشر</th>
+                            <th>تاريخ الإضافة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksBody">
+                        <!-- البيانات تظهر هنا -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- تذييل الصفحة -->
+        <footer class="footer">
+            <p>© 2024 نظام إدارة المكتبة الشخصية | تم تطويره بواسطة 
+                <span class="highlight">HTML, CSS, JavaScript</span>
+            </p>
+            <p class="storage-info">
+                <i class="fas fa-hard-drive"></i>
+                التخزين المحلي: <span id="storageUsed">0</span> كيلوبايت
+                <button class="btn-small" onclick="clearAllData()" title="حذف جميع البيانات">
+                    <i class="fas fa-trash"></i> حذف الكل
+                </button>
+            </p>
+        </footer>
+    </div>
+
+    <!-- نموذج التعديل (يظهر كـ modal) -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2><i class="fas fa-edit"></i> تعديل الكتاب</h2>
+            <form id="editForm"></form>
+        </div>
+    </div>
+
+
+<script src="app.js"></script>
+ 
+</body>
+</html>
